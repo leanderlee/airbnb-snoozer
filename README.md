@@ -34,3 +34,15 @@ check that it's running after a while with
 ```bash
 grep cron /var/log/syslog
 ```
+
+### Troubleshooting
+
+Try running `DEBUG=* xvfb-run /home/ubuntu/airbnb-snoozer/index.js -s` on the server and see if it works.
+
+If it doesn't seem to be doing anything (ie. it's just queued and not going to the webpage) try this and see if there is anything missing.
+
+```bash
+cd node_modules/nightmare/node_modules/electron-prebuilt/dist
+ldd electron | grep ‘not found'
+```
+On OSX you can use the `-d` parameter to show the window as it's working.
