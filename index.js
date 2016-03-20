@@ -1,0 +1,92 @@
+#!/usr/bin/env node
+
+var program = require('commander');
+
+program
+  .option('-s, --snooze', 'Should snooze.')
+  .option('-d, --debug', 'Show window.')
+  .option('-c, --config [file]', 'Config file.', './config.json')
+  .parse(process.argv);
+
+var CONFIG = require(program.config);
+var Nightmare = require('nightmare');
+var moment = require('moment');
+var Postmark = require('postmark');
+var USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.116 Safari/537.36';
+var AIRBNB_EMAIL = CONFIG.email;
+var AIRBNB_PASS = CONFIG.password;
+var POSTMARK = CONFIG.postmark_api;
+var SNOOZE = program.snooze;
+var ACTION = SNOOZE ? 'snoozing' : 'listing';
+var LISTING = 8190081;
+var TIMEOUT = 60*1000;
+
+
+console.log("%s - (%s) listing %s.\ndial airbnb.com (timeout %d)...", ACTION, AIRBNB_EMAIL, LISTING, TIMEOUT);
+
+var nightmare = Nightmare({ show: program.debug })
+var postmark = new Postmark.Client(POSTMARK);
+var timeout = setTimeout(function () {
+  nightmare.end();
+  postmark.sendEmail({
+    From: 'Airbnb Snoozer <' + CONFIG.postmark_email + '>', 
+    To: AIRBNB_EMAIL,
+    Subject: 'Airbnb Snoozer Failed! -- Timeout',
+    HtmlBody: `
+      Hello ${AIRBNB_EMAIL},<br>
+      <br>
+      We had problems ${ACTION} your listing ${LISTING}.<br>
+      <br>
+      Might want to look into it!<br>
+      <br>
+      Thanks,<br>
+      Airbnb Snoozer
+    `,
+    TextBody: `We had problems ${ACTION} your listing ${LISTING} for user ${AIRBNB_EMAIL}`
+  }, function () {
+    console.log("snooze failed - timeout.");
+    process.exit(1);
+  });
+}, TIMEOUT)
+
+
+nightmare
+  .useragent(USER_AGENT)
+  .goto('http://airbnb.com/logout')
+  .goto('http://airbnb.com/manage-listing/' + LISTING)
+  .wait(100)
+  .type('#signin_email', AIRBNB_EMAIL)
+  .type('#signin_password', AIRBNB_PASS)
+  .wait(100)
+  .click('#user-login-btn')
+  .run(function () {
+    if (SNOOZE) {
+      nightmare
+        .wait('#availability-dropdown')
+        .select('#availability-dropdown select', 'snoozed')
+        .wait('form.snooze-mode-form')
+          .insert('form.snooze-mode-form input[name=end-date]', '')
+          .type('form.snooze-mode-form input[name=end-date]', moment().add(1, 'week').format('L'))
+        .click('.snooze-modal .btn.btn-primary')
+        .click('.snooze-modal .btn.btn-primary')
+        .wait('#availability-dropdown .dot.dot-red')
+        .end()
+        .then(function () {
+          console.log("snooze succeeded.")
+          clearTimeout(timeout);
+          process.exit(0);
+        })
+    } else {
+      nightmare
+        .wait('#availability-dropdown')
+        .select('#availability-dropdown select', 'listed')
+        .wait('#availability-dropdown .dot.dot-success')
+        .end()
+        .then(function () {
+          console.log("listing succeeded.")
+          clearTimeout(timeout);
+          process.exit(0);
+        })
+
+    }
+  })
