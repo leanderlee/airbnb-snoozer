@@ -61,20 +61,36 @@ nightmare
   .click('#user-login-btn')
   .run(function () {
     if (SNOOZE) {
+      var snooze_until = moment().add(1, 'week').format('L');
       nightmare
         .wait('#availability-dropdown')
         .select('#availability-dropdown select', 'snoozed')
         .wait('form.snooze-mode-form')
           .insert('form.snooze-mode-form input[name=end-date]', '')
-          .type('form.snooze-mode-form input[name=end-date]', moment().add(1, 'week').format('L'))
+          .type('form.snooze-mode-form input[name=end-date]', snooze_until)
         .click('.snooze-modal .btn.btn-primary')
         .click('.snooze-modal .btn.btn-primary')
         .wait('#availability-dropdown .dot.dot-red')
         .end()
         .then(function () {
-          console.log("snooze succeeded.")
           clearTimeout(timeout);
-          process.exit(0);
+          postmark.sendEmail({
+            From: 'Airbnb Snoozer <' + CONFIG.postmark_email + '>', 
+            To: AIRBNB_EMAIL,
+            Subject: 'Airbnb Snoozed!',
+            HtmlBody: `
+              Hello ${AIRBNB_EMAIL},<br>
+              <br>
+              We just snoozed your <a href="https://airbnb.com/manage-listing/${LISTING}">listing</a>.
+              <br>
+              Thanks,<br>
+              Airbnb Snoozer
+            `,
+            TextBody: `We have began ${ACTION} your listing ${LISTING} for user ${AIRBNB_EMAIL}`
+          }, function () {
+            console.log("snooze succeeded.");
+            process.exit(0);
+          });
         })
     } else {
       nightmare
@@ -83,9 +99,24 @@ nightmare
         .wait('#availability-dropdown .dot.dot-success')
         .end()
         .then(function () {
-          console.log("listing succeeded.")
           clearTimeout(timeout);
-          process.exit(0);
+          postmark.sendEmail({
+            From: 'Airbnb Snoozer <' + CONFIG.postmark_email + '>', 
+            To: AIRBNB_EMAIL,
+            Subject: 'Airbnb Relisted!',
+            HtmlBody: `
+              Hello ${AIRBNB_EMAIL},<br>
+              <br>
+              We have started your <a href="https://airbnb.com/manage-listing/${LISTING}">listing</a> again.<br>
+              <br>
+              Thanks,<br>
+              Airbnb Snoozer
+            `,
+            TextBody: `We have began ${ACTION} ${LISTING} for user ${AIRBNB_EMAIL}`
+          }, function () {
+            console.log("listing succeeded.")
+            process.exit(0);
+          });
         })
 
     }
