@@ -31,13 +31,13 @@ var timeout = setTimeout(function () {
   postmark.sendEmail({
     From: 'Airbnb Snoozer <' + CONFIG.postmark_email + '>', 
     To: AIRBNB_EMAIL,
-    Subject: 'Airbnb Snoozer Failed! -- Timeout',
+    Subject: '***** [FAILED] ***** Airbnb Snoozer has failed!',
     HtmlBody: `
       Hello ${AIRBNB_EMAIL},<br>
       <br>
-      We had problems ${ACTION} your listing ${LISTING}.<br>
+      I'm afraid we have failed your great one. We had problems ${ACTION} your <a href="https://airbnb.com/manage-listing/${LISTING}">listing</a>.<br>
       <br>
-      Might want to look into it!<br>
+      Please set it manually and someone will be looking into it shortly!<br>
       <br>
       Thanks,<br>
       Airbnb Snoozer
