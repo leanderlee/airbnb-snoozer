@@ -16,10 +16,10 @@ var USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/53
 var AIRBNB_EMAIL = CONFIG.email;
 var AIRBNB_PASS = CONFIG.password;
 var POSTMARK = CONFIG.postmark_api;
+var LISTING = CONFIG.listing;
+var TIMEOUT = CONFIG.timeout || 60*1000;
 var SNOOZE = program.snooze;
 var ACTION = SNOOZE ? 'snoozing' : 'listing';
-var LISTING = 8190081;
-var TIMEOUT = 60*1000;
 
 
 console.log("%s - (%s) listing %s.\ndial airbnb.com (timeout %d)...", ACTION, AIRBNB_EMAIL, LISTING, TIMEOUT);
@@ -48,7 +48,6 @@ var timeout = setTimeout(function () {
     process.exit(1);
   });
 }, TIMEOUT)
-
 
 nightmare
   .useragent(USER_AGENT)
