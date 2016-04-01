@@ -8,6 +8,10 @@ program
   .option('-c, --config [file]', 'Config file.', './config.json')
   .parse(process.argv);
 
+if (program.debug) {
+  process.env.DEBUG = '*';
+}
+
 var CONFIG = require(program.config);
 var Nightmare = require('nightmare');
 var moment = require('moment');
@@ -51,13 +55,15 @@ var timeout = setTimeout(function () {
 
 nightmare
   .useragent(USER_AGENT)
-  .goto('http://airbnb.com/logout')
-  .goto('http://airbnb.com/manage-listing/' + LISTING)
+  .goto('https://airbnb.com/logout')
+  .goto('https://airbnb.com/login')
   .wait(100)
   .type('#signin_email', AIRBNB_EMAIL)
   .type('#signin_password', AIRBNB_PASS)
   .wait(100)
   .click('#user-login-btn')
+  .wait(100)
+  .goto('https://airbnb.com/manage-listing/' + LISTING)
   .run(function () {
     if (SNOOZE) {
       var snooze_until = moment().add(1, 'week').format('L');
