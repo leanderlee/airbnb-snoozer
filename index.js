@@ -68,14 +68,18 @@ nightmare
   .goto('https://airbnb.com/manage-listing/' + LISTING)
   .run(function () {
     if (SNOOZE) {
+      var snooze_start = moment().format('L');
       var snooze_until = moment().add(1, 'week').format('L');
       nightmare
         .wait('#availability-dropdown')
         .select('#availability-dropdown select', 'snoozed')
         .wait('form.snooze-mode-form')
+          .insert('form.snooze-mode-form input[name=start-date]', '')
+          .type('form.snooze-mode-form input[name=start-date]', snooze_start)
+          .wait(100)
           .insert('form.snooze-mode-form input[name=end-date]', '')
           .type('form.snooze-mode-form input[name=end-date]', snooze_until)
-        .wait(100)
+          .wait(100)
         .click('.snooze-modal .btn.btn-primary')
         .wait(100)
         .click('.snooze-modal .btn.btn-primary')
