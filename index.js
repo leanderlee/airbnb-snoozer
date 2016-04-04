@@ -77,6 +77,7 @@ nightmare
           .type('form.snooze-mode-form input[name=end-date]', snooze_until)
         .wait(100)
         .click('.snooze-modal .btn.btn-primary')
+        .wait(100)
         .click('.snooze-modal .btn.btn-primary')
         .wait('#availability-dropdown .dot.dot-red')
         .end()
