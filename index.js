@@ -5,6 +5,7 @@ var program = require('commander');
 program
   .option('-s, --snooze', 'Should snooze.')
   .option('-d, --debug', 'Show window.')
+  .option('-n, --no-email', 'Do not email.')
   .option('-c, --config [file]', 'Config file.', './config.json')
   .parse(process.argv);
 
@@ -32,6 +33,7 @@ var nightmare = Nightmare({ show: program.debug })
 var postmark = new Postmark.Client(POSTMARK);
 var timeout = setTimeout(function () {
   nightmare.end();
+  if (!program.email) return console.log('snoozer failed. :(');
   postmark.sendEmail({
     From: 'Airbnb Snoozer <' + CONFIG.postmark_email + '>', 
     To: AIRBNB_EMAIL,
@@ -79,6 +81,7 @@ nightmare
         .end()
         .then(function () {
           clearTimeout(timeout);
+          if (!program.email) return console.log('snoozer succeeded - snoozed.');
           postmark.sendEmail({
             From: 'Airbnb Snoozer <' + CONFIG.postmark_email + '>', 
             To: AIRBNB_EMAIL,
@@ -105,6 +108,7 @@ nightmare
         .end()
         .then(function () {
           clearTimeout(timeout);
+          if (!program.email) return console.log('snoozer succeeded - relisted.');
           postmark.sendEmail({
             From: 'Airbnb Snoozer <' + CONFIG.postmark_email + '>', 
             To: AIRBNB_EMAIL,
