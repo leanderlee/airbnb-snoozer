@@ -71,14 +71,14 @@ nightmare
       var snooze_start = moment().format('L');
       var snooze_until = moment().add(1, 'week').format('L');
       nightmare
+        .wait(100)
         .wait('#availability-dropdown')
+        .wait(100)
         .select('#availability-dropdown select', 'snoozed')
         .wait('form.snooze-mode-form')
-          .insert('form.snooze-mode-form input[name=start-date]', '')
-          .type('form.snooze-mode-form input[name=start-date]', snooze_start)
+          .insert('form.snooze-mode-form input[name=start-date]', snooze_start)
           .wait(100)
-          .insert('form.snooze-mode-form input[name=end-date]', '')
-          .type('form.snooze-mode-form input[name=end-date]', snooze_until)
+          .insert('form.snooze-mode-form input[name=end-date]', snooze_until)
           .wait(100)
         .click('.snooze-modal .btn.btn-primary')
         .wait(100)
