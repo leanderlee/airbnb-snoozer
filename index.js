@@ -60,6 +60,7 @@ nightmare
   .goto('https://airbnb.com/logout')
   .goto('https://airbnb.com/login')
   .wait(100)
+  .insert('#signin_email', '')
   .type('#signin_email', AIRBNB_EMAIL)
   .type('#signin_password', AIRBNB_PASS)
   .wait(100)
